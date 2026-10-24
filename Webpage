@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>คำนวณค่า GP ใบลดหนี้ — Material 3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Google+Sans+Text:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+<style>
+/* ============================================================
+   Material Design 3 — Design Tokens
+   Baseline color scheme (seed: #6750A4) + dark scheme
+   ============================================================ */
+:root {
+  /* M3 Color roles — Light */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-on-surface: #1D1B20;
+  --md-sys-color-on-surface-variant: #49454F;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low: #F7F2FA;
+  --md-sys-color-surface-container: #F3EDF7;
+  --md-sys-color-surface-container-high: #ECE6F0;
+  --md-sys-color-surface-container-highest: #E6E0E9;
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
+  --md-sys-color-inverse-surface: #322F35;
+  --md-sys-color-inverse-on-surface: #F5EFF7;
+  --md-sys-color-inverse-primary: #D0BCFF;
+  --md-sys-color-scrim: #000000;
+
+  /* M3 Type scale */
+  --md-sys-typescale-headline-font: "Google Sans Text", "Roboto", sans-serif;
+  --md-sys-typescale-body-font: "Roboto", sans-serif;
+
+  /* M3 Shape */
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+
+  /* M3 Elevation */
+  --md-sys-elevation-1: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+  --md-sys-elevation-2: 0 1px 2px rgba(0,0,0,.3), 0 2px 6px 2px rgba(0,0,0,.15);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --md-sys-color-primary: #D0BCFF;
+  --md-sys-color-on-primary: #381E72;
+  --md-sys-color-primary-container: #4F378B;
+  --md-sys-color-on-primary-container: #EADDFF;
+  --md-sys-color-secondary: #CCC2DC;
+  --md-sys-color-on-secondary: #332D41;
+  --md-sys-color-secondary-container: #4A4458;
+  --md-sys-color-on-secondary-container: #E8DEF8;
+  --md-sys-color-tertiary: #EFB8C8;
+  --md-sys-color-surface: #141218;
+  --md-sys-color-on-surface: #E6E0E9;
+  --md-sys-color-on-surface-variant: #CAC4D0;
+  --md-sys-color-surface-container-lowest: #0F0D13;
+  --md-sys-color-surface-container-low: #1D1B20;
+  --md-sys-color-surface-container: #211F26;
+  --md-sys-color-surface-container-high: #2B2930;
+  --md-sys-color-surface-container-highest: #36343B;
+  --md-sys-color-outline: #938F99;
+  --md-sys-color-outline-variant: #49454F;
+  --md-sys-color-inverse-surface: #E6E0E9;
+  --md-sys-color-inverse-on-surface: #322F35;
+  --md-sys-color-inverse-primary: #6750A4;
+
+  color-scheme: dark;
+}
+
+/* ============ Base ============ */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--md-sys-typescale-body-font);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  transition: background-color .2s ease, color .2s ease;
+}
+.material-symbols-rounded {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 24px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* ============ Top App Bar (M3 small, centered) ============ */
+.top-bar {
+  position: sticky; top: 0; z-index: 10;
+  height: 64px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+.top-bar__title {
+  font-family: var(--md-sys-typescale-headline-font);
+  font-size: 22px; font-weight: 400; letter-spacing: 0;
+}
+.icon-btn {
+  position: absolute; top: 8px;
+  width: 48px; height: 48px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 50%;
+  background: transparent; color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  transition: background-color .15s ease;
+}
+.icon-btn:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 8%, transparent); }
+.icon-btn:active { background: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 12%, transparent); }
+.icon-btn--right { right: 8px; }
+.icon-btn--left { left: 8px; }
+
+/* ============ Layout ============ */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex; flex-direction: column; gap: 24px;
+}
+
+/* ============ M3 Card (filled) ============ */
+.card {
+  background: var(--md-sys-color-surface-container-low);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+.card--results { background: var(--md-sys-color-surface-container); gap: 0; padding: 8px 0; }
+
+.card__title {
+  display: flex; align-items: center; gap: 12px;
+  font-family: var(--md-sys-typescale-headline-font);
+  font-size: 16px; font-weight: 500; color: var(--md-sys-color-on-surface);
+}
+.card__title .material-symbols-rounded { color: var(--md-sys-color-primary); }
+
+/* ============ M3 Outlined Text Field ============ */
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 560px) { .field-grid { grid-template-columns: 1fr; } }
+
+.text-field { position: relative; }
+.text-field input {
+  width: 100%;
+  padding: 16px 52px 16px 16px;
+  font: inherit; font-size: 16px;
+  color: var(--md-sys-color-on-surface);
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  outline: none;
+  caret-color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+  transition: border-color .15s ease;
+}
+.text-field input:hover { border-color: var(--md-sys-color-on-surface); }
+.text-field input:focus { border-color: var(--md-sys-color-primary); border-width: 2px; padding: 15px 51px 15px 15px; }
+.text-field label {
+  position: absolute; left: 12px; top: -8px;
+  padding: 0 4px;
+  font-size: 12px; font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+  background: var(--md-sys-color-surface-container-low);
+  pointer-events: none;
+  transition: color .15s ease;
+}
+.text-field:focus-within label { color: var(--md-sys-color-primary); }
+.text-field .suffix {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 14px; color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+
+/* ============ M3 List (results) ============ */
+.list-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 20px;
+  min-height: 64px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.list-item:last-child { border-bottom: none; }
+.list-item__icon {
+  width: 40px; height: 40px; flex: none;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+.list-item__icon .material-symbols-rounded { font-size: 20px; }
+.list-item__body { flex: 1; min-width: 0; }
+.list-item__headline { font-size: 15px; font-weight: 400; color: var(--md-sys-color-on-surface); }
+.list-item__supporting { font-size: 13px; color: var(--md-sys-color-on-surface-variant); margin-top: 2px; }
+.list-item__trailing {
+  font-size: 17px; font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.list-item--highlight .list-item__icon { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+.list-item--highlight .list-item__trailing { color: var(--md-sys-color-primary); font-size: 19px; }
+
+/* ============ M3 Button (tonal) ============ */
+.actions { display: flex; gap: 12px; justify-content: flex-end; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 40px; padding: 0 24px;
+  border: none; border-radius: var(--md-sys-shape-corner-full, 20px);
+  font: inherit; font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  cursor: pointer;
+  transition: box-shadow .15s ease, background-color .15s ease;
+}
+.btn--filled {
+  background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+}
+.btn--filled:hover { box-shadow: var(--md-sys-elevation-1); }
+.btn--tonal {
+  background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
+}
+.btn--tonal:hover { box-shadow: var(--md-sys-elevation-1); }
+.btn:active { box-shadow: none; }
+
+/* ============ M3 Snackbar ============ */
+.snackbar {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 80px);
+  background: var(--md-sys-color-inverse-surface);
+  color: var(--md-sys-color-inverse-on-surface);
+  font-size: 14px;
+  padding: 14px 16px; border-radius: var(--md-sys-shape-corner-small);
+  box-shadow: var(--md-sys-elevation-2);
+  opacity: 0; pointer-events: none;
+  transition: transform .25s cubic-bezier(.2,0,0,1), opacity .25s ease;
+  z-index: 100;
+}
+.snackbar.show { transform: translate(-50%, 0); opacity: 1; }
+
+.footer-note {
+  font-size: 13px; color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<!-- M3 Small Top App Bar -->
+<header class="top-bar">
+  <span class="top-bar__title">คำนวณค่า GP ใบลดหนี้</span>
+  <button class="icon-btn icon-btn--right" id="themeToggle" aria-label="สลับธีม">
+    <span class="material-symbols-rounded" id="themeIcon">dark_mode</span>
+  </button>
+</header>
+
+<main class="page">
+
+  <!-- Input Card -->
+  <section class="card" aria-label="ข้อมูลนำเข้า">
+    <div class="card__title">
+      <span class="material-symbols-rounded">edit_note</span>
+      ข้อมูลใบกำกับภาษี
+    </div>
+    <div class="field-grid">
+      <div class="text-field">
+        <label for="gpTotal">ยอดรวมใบกำกับภาษีเดิม</label>
+        <input id="gpTotal" type="text" inputmode="decimal" value="100,000.00">
+        <span class="suffix">บาท</span>
+      </div>
+      <div class="text-field">
+        <label for="gpPct">ค่า GP</label>
+        <input id="gpPct" type="text" inputmode="decimal" value="10">
+        <span class="suffix">%</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn--tonal" id="copyBtn">
+        <span class="material-symbols-rounded" style="font-size:18px">content_copy</span>
+        คัดลอกผลลัพธ์
+      </button>
+      <button class="btn btn--filled" id="resetBtn">
+        <span class="material-symbols-rounded" style="font-size:18px">restart_alt</span>
+        รีเซ็ต
+      </button>
+    </div>
+  </section>
+
+  <!-- Results Card -->
+  <section class="card card--results" aria-label="ผลการคำนวณ" aria-live="polite">
+    <div class="list-item">
+      <span class="list-item__icon"><span class="material-symbols-rounded">percent</span></span>
+      <div class="list-item__body">
+        <div class="list-item__headline">1. ค่าส่วนลด GP</div>
+        <div class="list-item__supporting">ยอดเดิม × GP%</div>
+      </div>
+      <span class="list-item__trailing" id="rDiscount">—</span>
+    </div>
+
+    <div class="list-item">
+      <span class="list-item__icon"><span class="material-symbols-rounded">contract</span></span>
+      <div class="list-item__body">
+        <div class="list-item__headline">2. ยอดรวมใหม่หลังหัก GP</div>
+        <div class="list-item__supporting">ยอดเดิม − ส่วนลด GP</div>
+      </div>
+      <span class="list-item__trailing" id="rNewTotal">—</span>
+    </div>
+
+    <div class="list-item">
+      <span class="list-item__icon"><span class="material-symbols-rounded">account_balance</span></span>
+      <div class="list-item__body">
+        <div class="list-item__headline">3. ภาษีมูลค่าเพิ่ม 7% ของยอดราคาใหม่</div>
+        <div class="list-item__supporting">ยอดใหม่ × 7/107</div>
+      </div>
+      <span class="list-item__trailing" id="rVat">—</span>
+    </div>
+
+    <div class="list-item list-item--highlight">
+      <span class="list-item__icon"><span class="material-symbols-rounded">check_circle</span></span>
+      <div class="list-item__body">
+        <div class="list-item__headline">4. ผลรวมที่ถูกต้อง (ยอดก่อนภาษี)</div>
+        <div class="list-item__supporting">ยอดใหม่ − ภาษีมูลค่าเพิ่ม</div>
+      </div>
+      <span class="list-item__trailing" id="rNet">—</span>
+    </div>
+  </section>
+
+  <p class="footer-note">ภาษีมูลค่าเพิ่มคำนวณแบบรวมภาษี (ยอดใหม่ × 7/107) ตามสูตรที่ระบุ · Material Design 3</p>
+</main>
+
+<div class="snackbar" id="snackbar">คัดลอกผลลัพธ์แล้ว</div>
+
+<script>
+(function () {
+  var totalEl = document.getElementById('gpTotal');
+  var pctEl = document.getElementById('gpPct');
+  var snackbar = document.getElementById('snackbar');
+  var snackTimer;
+
+  function parseNum(s) {
+    var n = parseFloat(String(s).replace(/,/g, '').trim());
+    return isNaN(n) ? 0 : n;
+  }
+  function fmt(n) {
+    return n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  var results = { discount: 0, newTotal: 0, vat: 0, net: 0 };
+
+  function calc() {
+    var total = parseNum(totalEl.value);
+    var pct = parseNum(pctEl.value);
+
+    results.discount = total * pct / 100;
+    results.newTotal = total - results.discount;
+    results.vat = results.newTotal * 7 / 107;
+    results.net = results.newTotal - results.vat;
+
+    document.getElementById('rDiscount').textContent = fmt(results.discount) + ' บาท';
+    document.getElementById('rNewTotal').textContent = fmt(results.newTotal) + ' บาท';
+    document.getElementById('rVat').textContent = fmt(results.vat) + ' บาท';
+    document.getElementById('rNet').textContent = fmt(results.net) + ' บาท';
+  }
+
+  function showSnackbar(msg) {
+    snackbar.textContent = msg;
+    snackbar.classList.add('show');
+    clearTimeout(snackTimer);
+    snackTimer = setTimeout(function () { snackbar.classList.remove('show'); }, 2200);
+  }
+
+  [totalEl, pctEl].forEach(function (el) {
+    el.addEventListener('input', calc);
+    el.addEventListener('blur', function () {
+      if (el === totalEl) el.value = fmt(parseNum(el.value));
+    });
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    totalEl.value = '100,000.00';
+    pctEl.value = '10';
+    calc();
+    showSnackbar('รีเซ็ตค่าเรียบร้อย');
+  });
+
+  document.getElementById('copyBtn').addEventListener('click', function () {
+    var text =
+      'คำนวณค่า GP ใบลดหนี้\n' +
+      'ยอดรวมใบกำกับภาษีเดิม: ' + fmt(parseNum(totalEl.value)) + ' บาท\n' +
+      'GP: ' + parseNum(pctEl.value) + '%\n' +
+      '———————————————\n' +
+      '1. ค่าส่วนลด GP: ' + fmt(results.discount) + ' บาท\n' +
+      '2. ยอดรวมใหม่หลังหัก GP: ' + fmt(results.newTotal) + ' บาท\n' +
+      '3. ภาษีมูลค่าเพิ่ม 7%: ' + fmt(results.vat) + ' บาท\n' +
+      '4. ผลรวมที่ถูกต้อง: ' + fmt(results.net) + ' บาท';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        showSnackbar('คัดลอกผลลัพธ์แล้ว');
+      }, function () { showSnackbar('คัดลอกไม่สำเร็จ'); });
+    } else {
+      showSnackbar('เบราว์เซอร์ไม่รองรับการคัดลอก');
+    }
+  });
+
+  /* M3 theme toggle (light / dark) */
+  var themeToggle = document.getElementById('themeToggle');
+  var themeIcon = document.getElementById('themeIcon');
+  function applyTheme(dark) {
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    themeIcon.textContent = dark ? 'light_mode' : 'dark_mode';
+    try { localStorage.setItem('gp-theme', dark ? 'dark' : 'light'); } catch (e) {}
+  }
+  var saved = null;
+  try { saved = localStorage.getItem('gp-theme'); } catch (e) {}
+  applyTheme(saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches);
+  themeToggle.addEventListener('click', function () {
+    applyTheme(document.documentElement.getAttribute('data-theme') !== 'dark');
+  });
+
+  calc();
+})();
+</script>
+</body>
+</html>
